@@ -1,0 +1,32 @@
+[build-system]
+requires = ["uv_build>=0.10.9,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "wcc"
+module-root = ""
+
+[project]
+name = "waseda-credit-calculator"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = ["questionary>=2.1.1", "rich>=14.1.0", "typer>=0.24.1"]
+license = { file = "LICENSE" }
+
+[project.urls]
+Repository = "https://github.com/seriaati/waseda-credit-calculator.git"
+
+[project.scripts]
+wcc = "wcc.main:app"
+
+[tool.pyright]
+enableTypeIgnoreComments = false
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+reportUnnecessaryComparison = true
+reportUnnecessaryContains = true
+reportUnnecessaryIsInstance = true
+reportUnnecessaryTypeIgnoreComment = true
+typeCheckingMode = "standard"
