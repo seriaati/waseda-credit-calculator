@@ -44,6 +44,6 @@ To start, you need to first get a CSV file of your grade report. This only works
 The showcase uses mock data.
 
 ![wcc total](./images/wcc_total.png)
-![wcc missing-categories](./images/wcc_missing-categories.png)
-![wcc missing-required](./images/wcc_missing-required.png)
+![wcc missing-categories](./images/wcc_missing_categories.png)
+![wcc missing-required](./images/wcc_missing_required.png)
 ![wcc overview](./images/wcc_overview.png)
