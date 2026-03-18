@@ -1,10 +1,10 @@
 # waseda-credit-calculator
 
-A command-line tool for calculating things about credits at Waseda University, made because the credit system is so god damn complex.
+A command-line tool for calculating credits at Waseda University, made because the credit system is so god damn complex.
 
 The credit calculation rule is based on the 2023 curriculum from the Waseda FSE Handbook, and only supports the CSCE major. Because I am a CSCE student enrolled in 2023.
 
-Basically, this tool is made for myself. However, I made it open source in case other people find it useful. You can fork and modify it to support your major and the curriculum you are enrolled in.
+In other words, I made this tool is for myself. However, I made it open source in case other people find it useful, especially the logic in calculating credits. You can fork and modify it to support your major and the curriculum you are enrolled in.
 
 ## Installation
 
