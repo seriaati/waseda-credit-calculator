@@ -3,8 +3,9 @@ from __future__ import annotations
 import csv
 import json
 import pathlib
+import re
 from collections import defaultdict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import questionary
 import typer
@@ -192,6 +193,73 @@ def _print_missing_categories_debug(
     console.print(category_debug_table)
 
 
+def _print_available_courses_for_missing_categories(
+    data: dict[str, Any],
+    display_rows: list[tuple[str, str, str, str]],
+    resolved_courses: list[ResolvedGradeReportCourse],
+    major: Major,
+) -> None:
+    current_year = determine_current_year(data)
+    missing_group_values = {row[0] for row in display_rows if int(row[3]) > 0}
+    passed_course_names = {
+        c.matched_course.name for c in resolved_courses if c.matched_course and c.earned_credits > 0
+    }
+
+    def _base_name(name: str) -> str:
+        return re.sub(r"\s*\(\d+\)\s*$", "", name)
+
+    passed_course_base_names = {_base_name(name) for name in passed_course_names}
+
+    b4_intro_credits = sum(
+        c.earned_credits
+        for c in resolved_courses
+        if c.matched_course
+        and c.matched_course.group == CourseGroup.B4
+        and c.matched_course.name.startswith("Introduction to ")
+        and "Programming" in c.matched_course.name
+    )
+
+    for group in CourseGroup:
+        if group.value not in missing_group_values:
+            continue
+
+        available_courses = [
+            course
+            for course in COURSES
+            if classify_course_group_for_major(course, major) == group
+            and is_course_due_by_year(course, current_year)
+            and course.name not in passed_course_names
+            and _base_name(course.name) not in passed_course_base_names
+        ]
+
+        if not available_courses:
+            continue
+
+        table_available = Table(
+            title=f"Available courses for {group.value}",
+            show_header=True,
+            header_style="bold magenta",
+        )
+        table_available.add_column("Course Name", style="bold")
+        table_available.add_column("Credits", justify="right", style="cyan")
+        table_available.add_column("Term", style="green")
+
+        for course in available_courses:
+            credits_str = str(course.credits)
+
+            if (
+                b4_intro_credits >= 2
+                and course.group == CourseGroup.B4
+                and course.name.startswith("Introduction to ")
+                and "Programming" in course.name
+            ):
+                credits_str += " [yellow](No graduation credit)[/yellow]"
+
+            table_available.add_row(course.name, credits_str, course.term.value)
+
+        console.print(table_available)
+
+
 def _build_missing_category_totals(
     graduation_requirement: GraduationRequirement,
     earned_credits_by_group: dict[CourseGroup, int],
@@ -315,6 +383,11 @@ def missing_categories(
         "--debug",
         help="Show detailed course-by-course calculation used for missing category totals.",
     ),
+    show_available: bool = typer.Option(
+        False,
+        "--show-available",
+        help="Print out available courses to register for each category that still have missing credits.",
+    ),
 ) -> None:
     """Displays missing credits in each graduation requirement category."""
     data = load_grade_report()
@@ -371,6 +444,9 @@ def missing_categories(
             category_debug_rows=category_debug_rows,
             major=major,
         )
+
+    if show_available and total_missing > 0:
+        _print_available_courses_for_missing_categories(data, display_rows, resolved_courses, major)
 
     show_unknown_courses(unknown_courses)
 
